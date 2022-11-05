@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <virtualType name="DynamicVariableDataProvider" type="WillWright\Translation\Model\Js\DataProvider">
+        <arguments>
+            <argument name="translate" xsi:type="object">WillWright\Translation\Framework\Translate</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="DynamicVariableJsonPreProcessor" type="WillWright\Translation\Model\Json\PreProcessor">
+        <arguments>
+            <argument name="dataProvider" xsi:type="object">DynamicVariableDataProvider</argument>
+            <argument name="translate" xsi:type="object">WillWright\Translation\Framework\Translate</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="AssetPreProcessorPool" type="Magento\Framework\View\Asset\PreProcessor\Pool">
+        <arguments>
+            <argument name="preprocessors" xsi:type="array">
+                <item name="json" xsi:type="array">
+                    <item name="json_generation_dynamic" xsi:type="array">
+                        <item name="class" xsi:type="string">DynamicVariableJsonPreProcessor</item>
+                    </item>
+                </item>
+            </argument>
+        </arguments>
+    </virtualType>
+</config>
