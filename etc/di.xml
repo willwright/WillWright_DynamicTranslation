@@ -6,7 +6,7 @@
         </arguments>
     </virtualType>
 
-    <virtualType name="DynamicVariableJsonPreProcessor" type="WillWright\Translation\Model\Json\PreProcessor">
+    <virtualType name="DynamicVariableJsonPreProcessor" type="Magento\Translation\Model\Json\PreProcessor">
         <arguments>
             <argument name="dataProvider" xsi:type="object">DynamicVariableDataProvider</argument>
             <argument name="translate" xsi:type="object">WillWright\Translation\Framework\Translate</argument>
