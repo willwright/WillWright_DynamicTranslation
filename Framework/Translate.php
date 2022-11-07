@@ -1,14 +1,12 @@
 <?php
-/**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
- */
 declare(strict_types=1);
 
-namespace WillWright\Translation\Framework;
+namespace WillWright\DynamicTranslation\Framework;
 
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Exception\FileSystemException;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Filesystem\Driver\File;
 use Magento\Framework\Filesystem\DriverInterface;
 
@@ -20,7 +18,15 @@ use Magento\Framework\Filesystem\DriverInterface;
  */
 class Translate extends \Magento\Framework\Translate implements \Magento\Framework\TranslateInterface
 {
-    const CONFIG_CUSTOM_MODULE_KEY = 'willwright';
+    const CONFIG_CUSTOM_MODULE_KEY = 'wwdt';
+
+    private DriverInterface $fileDriver;
+
+    /**
+     * @var \Magento\Framework\Serialize\SerializerInterface
+     */
+    private \Magento\Framework\Serialize\SerializerInterface $serializer;
+
 
     /**
      * @param \Magento\Framework\View\DesignInterface $viewDesign
@@ -52,7 +58,7 @@ class Translate extends \Magento\Framework\Translate implements \Magento\Framewo
         \Magento\Framework\App\State $appState,
         \Magento\Framework\Filesystem $filesystem,
         \Magento\Framework\App\RequestInterface $request,
-        \Magento\Framework\File\Csv $csvParser,
+        \WillWright\DynamicTranslation\Framework\File\Csv $csvParser,
         \Magento\Framework\App\Language\Dictionary $packDictionary,
         DriverInterface $fileDriver = null
     ) {
@@ -79,6 +85,23 @@ class Translate extends \Magento\Framework\Translate implements \Magento\Framewo
             self::CONFIG_THEME_KEY => null,
             self::CONFIG_MODULE_KEY => null,
         ];
+
+        parent::__construct(
+            $viewDesign,
+            $cache,
+            $viewFileSystem,
+            $moduleList,
+            $modulesReader,
+            $scopeResolver,
+            $translate,
+            $locale,
+            $appState,
+            $filesystem,
+            $request,
+            $csvParser,
+            $packDictionary,
+            $fileDriver
+        );
     }
 
     /**
@@ -87,6 +110,7 @@ class Translate extends \Magento\Framework\Translate implements \Magento\Framewo
      * @param string|null $area
      * @param bool $forceReload
      * @return $this
+     * @throws LocalizedException
      */
     public function loadData($area = null, $forceReload = false)
     {
@@ -120,43 +144,19 @@ class Translate extends \Magento\Framework\Translate implements \Magento\Framewo
     }
 
     /**
-     * Adding translation data
-     *
-     * @param array $data
-     * @return $this
-     */
-    protected function _addData($data)
-    {
-        foreach ($data as $key => $value) {
-            if ($key === $value) {
-                if (isset($this->_data[$key])) {
-                    unset($this->_data[$key]);
-                }
-                continue;
-            }
-
-            $key = is_array($key) ? $key : (string) $key;
-            $value = is_array($value) ? $value : (string) $value;
-            $key = str_replace('""', '"', $key);
-            $value = str_replace('""', '"', $value);
-
-            $this->_data[$key] = $value;
-        }
-        return $this;
-    }
-
-    /**
      * Retrieve data from file
      *
      * @param string $file
      * @return array
+     * @throws FileSystemException
+     * @throws \Exception
      */
     protected function _getFileData($file)
     {
         $data = [];
         if ($this->fileDriver->isExists($file)) {
             $this->_csvParser->setDelimiter(',');
-            $data = $this->_csvParser->getData($file);
+            $data = $this->_csvParser->getDataPairsExtended($file);
         }
         return $data;
     }
@@ -173,32 +173,6 @@ class Translate extends \Magento\Framework\Translate implements \Magento\Framewo
             $data = $this->getSerializer()->unserialize($data);
         }
         return $data;
-    }
-
-    /**
-     * Load data from module translation files
-     *
-     * @return $this
-     */
-    protected function _loadModuleTranslation()
-    {
-        $currentModule = $this->getControllerModuleName();
-        $allModulesExceptCurrent = array_diff($this->_moduleList->getNames(), [$currentModule]);
-
-        $this->loadModuleTranslationByModulesList($allModulesExceptCurrent);
-        $this->loadModuleTranslationByModulesList([$currentModule]);
-        return $this;
-    }
-
-    /**
-     * Load translation dictionary from language packages
-     *
-     * @return void
-     */
-    protected function _loadPackTranslation()
-    {
-        $data = $this->packDictionary->getDictionary($this->getLocale());
-        $this->_addData($data);
     }
 
     /**
@@ -262,7 +236,7 @@ class Translate extends \Magento\Framework\Translate implements \Magento\Framewo
     {
         if ($this->serializer === null) {
             $this->serializer = \Magento\Framework\App\ObjectManager::getInstance()
-                ->get(Serialize\SerializerInterface::class);
+                ->get(\Magento\Framework\Serialize\SerializerInterface::class);
         }
         return $this->serializer;
     }
@@ -272,6 +246,7 @@ class Translate extends \Magento\Framework\Translate implements \Magento\Framewo
      *
      * @param array $modules
      * @return $this
+     * @throws FileSystemException
      */
     protected function loadModuleTranslationByModulesList(array $modules)
     {
@@ -296,9 +271,8 @@ class Translate extends \Magento\Framework\Translate implements \Magento\Framewo
             $themes[] = $parentTheme;
             $parentTheme = $parentTheme->getParentTheme();
         }
-        $themes = array_reverse($themes);
 
-        return $themes;
+        return array_reverse($themes);
     }
 
     /**

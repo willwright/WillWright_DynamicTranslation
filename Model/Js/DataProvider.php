@@ -1,9 +1,7 @@
 <?php
 
-namespace WillWright\Translation\Model\Js;
+namespace WillWright\DynamicTranslation\Model\Js;
 
-use Magento\Framework\Exception\LocalizedException;
-use Magento\Translation\Model\Js\Config;
 use Magento\Translation\Model\Js\DataProviderInterface;
 
 /**
@@ -13,7 +11,7 @@ use Magento\Translation\Model\Js\DataProviderInterface;
  */
 class DataProvider implements DataProviderInterface
 {
-    private $translate;
+    private \Magento\Framework\TranslateInterface $translate;
 
     public function __construct(
         \Magento\Framework\TranslateInterface $translate,
@@ -27,21 +25,19 @@ class DataProvider implements DataProviderInterface
      * @param string $themePath
      * @return array
      * @throws \Exception
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getData($themePath)
     {
         $dictionary = [];
 
         $allTranslations = $this->translate->getData();
-        foreach ($allTranslations as $translation) {
-            if (count($translation) > 2) {
+        foreach ($allTranslations as $key => $translation) {
+            if (count($translation) > 1) {
                 if (in_array('dynamic', $translation)) {
-                    $dictionary[$translation[0]] = $translation[1];
+                    $dictionary[$key] = $translation[0];
                 }
             }
         }
-
         ksort($dictionary);
 
         return $dictionary;
