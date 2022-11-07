@@ -1,10 +1,10 @@
-# WillWright_DynamicTranslation
+# Mecodeninja_DynamicTranslation
 
 Magento 2 module that allows a developer to flag rows in translation dictionaries to be added regardless of whether a
 instance of the string is matched or not.
 
 ## Install
-`composer require will-wright/module-dynamic-translation`
+`composer require mecodeninja/module-dynamic-translation`
 
 ## Usage
 Append `,dynamic` to any translation which should be added to the dictionary (`js-translation.json`).

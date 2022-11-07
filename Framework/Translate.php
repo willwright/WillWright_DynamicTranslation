@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace WillWright\DynamicTranslation\Framework;
+namespace Mecodeninja\DynamicTranslation\Framework;
 
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\ObjectManager;
@@ -40,7 +40,7 @@ class Translate extends \Magento\Framework\Translate implements \Magento\Framewo
      * @param \Magento\Framework\App\State $appState
      * @param \Magento\Framework\Filesystem $filesystem
      * @param \Magento\Framework\App\RequestInterface $request
-     * @param \Magento\Framework\File\Csv $csvParser
+     * @param \Mecodeninja\DynamicTranslation\Framework\File\Csv $csvParser
      * @param \Magento\Framework\App\Language\Dictionary $packDictionary
      * @param DriverInterface|null $fileDriver
      *
@@ -58,7 +58,7 @@ class Translate extends \Magento\Framework\Translate implements \Magento\Framewo
         \Magento\Framework\App\State $appState,
         \Magento\Framework\Filesystem $filesystem,
         \Magento\Framework\App\RequestInterface $request,
-        \WillWright\DynamicTranslation\Framework\File\Csv $csvParser,
+        \Mecodeninja\DynamicTranslation\Framework\File\Csv $csvParser,
         \Magento\Framework\App\Language\Dictionary $packDictionary,
         DriverInterface $fileDriver = null
     ) {

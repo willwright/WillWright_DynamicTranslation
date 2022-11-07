@@ -1,3 +1,3 @@
 <?php
 use Magento\Framework\Component\ComponentRegistrar;
-ComponentRegistrar::register(ComponentRegistrar::MODULE, 'WillWright_DynamicTranslation', __DIR__);
+ComponentRegistrar::register(ComponentRegistrar::MODULE, 'Mecodeninja_DynamicTranslation', __DIR__);
