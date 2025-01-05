@@ -32,7 +32,7 @@ class DataProvider implements DataProviderInterface
 
         $allTranslations = $this->translate->getData();
         foreach ($allTranslations as $key => $translation) {
-            if (count($translation) > 1) {
+            if (is_array($translation) && count($translation) > 1) {
                 if (in_array('dynamic', $translation)) {
                     $dictionary[$key] = $translation[0];
                 }
